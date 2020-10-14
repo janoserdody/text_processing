@@ -6,10 +6,10 @@ from contractions import Contractions
 
 translation = {
     8217: None,
-    8220: '"',
-    8221: '"',
-    8212: '-',
-    8216: '"',
+    8220: None,
+    8221: None,
+    8212: ' ',
+    8216: None,
     249: ' ',
     10: ' ',
     ord(','): None,
@@ -22,6 +22,7 @@ translation = {
     ord('/'): None,
     ord('#'): None,
     ord('['): None,
+    ord('"'): None,
     ord(']'): None,
     ord(')'): None,
     ord('*'): None,
@@ -109,6 +110,13 @@ def readfile(filename):
             rows.append(line)
         return rows
 
+def readfile_cleaned(filename):
+    with open(filename, encoding='utf-8-sig') as f:
+        rows = []
+        for line in f:
+            rows.append(line.replace('\n',''))
+        return rows
+
 def readtodictionary(filename):
     with open(filename, encoding='utf-8-sig') as f:
         lemmatization = dict()
@@ -165,8 +173,14 @@ def convert2number(xx, result):
     else:
         return text[xx]
 
+def is_stopword(s):
+    if s in stop_words:
+        return bool(1)
+    return bool(0)
+
 rows = readfile('.\\data\\Alice.txt')
 stem_words = readtodictionary('.\\data\\lemmatization-en.txt')
+stop_words = readfile_cleaned('.\\data\\englishstopwords.txt')
 
 result = np.asarray([' '], dtype=np.str)
 
@@ -176,6 +190,8 @@ for row in rows:
     result = np.char.add(result, s)
 
 text = np.char.split(result).tolist()[0]
+
+text = list(filter(lambda stop: (is_stopword(stop) == bool(0)), text))
 
 for x in range(len(text)):
     if x >= len(text):
