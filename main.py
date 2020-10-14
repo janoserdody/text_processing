@@ -1,8 +1,10 @@
 import re
 import numpy as np
-from numpy.core._multiarray_umath import ndarray
-
 from contractions import Contractions
+
+PAD_token = 0   # Used for padding short sentences
+SOS_token = 1   # Start-of-sentence token
+EOS_token = 2   # End-of-sentence token
 
 translation = {
     8217: None,
@@ -12,9 +14,6 @@ translation = {
     8216: None,
     249: ' ',
     10: ' ',
-    ord(','): None,
-    ord('.'): None,
-    ord(';'): None,
     ord(':'): None,
     ord('?'): None,
     ord('('): None,
@@ -147,7 +146,6 @@ def isnumber(name):
         return bool(1)
     return bool(0)
 
-
 def convert2number(xx, result):
     if isnumber(text[xx]) or text[xx].find('-') > 0:
         str = text[xx].split('-')
@@ -178,13 +176,27 @@ def is_stopword(s):
         return bool(1)
     return bool(0)
 
+def dropheader(rows):
+    for x in range(len(rows)):
+        row = rows[0]
+        if row.find('Alice was beginning to get very tired') != -1:
+            return rows
+        else:
+            rows.remove(row)
+    return rows
+
 rows = readfile('.\\data\\Alice.txt')
 stem_words = readtodictionary('.\\data\\lemmatization-en.txt')
 stop_words = readfile_cleaned('.\\data\\englishstopwords.txt')
 
 result = np.asarray([' '], dtype=np.str)
 
+rows = dropheader(rows)
+
 for row in rows:
+    # find footer
+    if row.find('THE END') != -1:
+        break
     row = row.lower().translate(translation)
     s = np.asarray(row, dtype=np.str)
     result = np.char.add(result, s)
