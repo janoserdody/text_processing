@@ -50,10 +50,24 @@ for row in rows:
     s = np.asarray(''.join(cleaned_text), dtype=np.str)
     result = np.char.add(result, s)
 
-#print(result)
+result = np.char.split(result)
 
-for item in stem_words.items():
+text_lem = np.asarray([' '], dtype=np.str)
+
+for item in result[0]:
+    try:
+        y = stem_words[item]
+    except:
+        y = item
+    yres = np.asarray([y], dtype=np.str)
+    text_lem = np.append(text_lem, yres)
+
+for item in text_lem:
     print(item)
+
+
+
+
 
 
 
