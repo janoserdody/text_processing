@@ -1,10 +1,14 @@
 import re
 import numpy as np
+
+from Vocabulary import Vocabulary
 from contractions import Contractions
 
 PAD_token = 0   # Used for padding short sentences
 SOS_token = 1   # Start-of-sentence token
 EOS_token = 2   # End-of-sentence token
+
+trans_punctuation = {ord('.'): None, ord('?'): None, ord('!'): None}
 
 translation = {
     8217: None,
@@ -15,7 +19,6 @@ translation = {
     249: ' ',
     10: ' ',
     ord(':'): None,
-    ord('?'): None,
     ord('('): None,
     ord('+'): None,
     ord('/'): None,
@@ -25,7 +28,6 @@ translation = {
     ord(']'): None,
     ord(')'): None,
     ord('*'): None,
-    ord('!'): None
 }
 
 word_to_number = {
@@ -185,6 +187,18 @@ def dropheader(rows):
             rows.remove(row)
     return rows
 
+def process_sentence(sentence):
+    for token in sentence.split(' '):
+        sent_tkns.append(token)
+        sent_idxs.append(voc.to_index(token))
+    print(sent_tkns)
+    print(sent_idxs)
+
+def is_sentence_end(word):
+    if word.find('.') != -1 or word.find('?') != -1 or word.find('!') != -1:
+        return bool(1)
+    return bool(0)
+
 rows = readfile('.\\data\\Alice.txt')
 stem_words = readtodictionary('.\\data\\lemmatization-en.txt')
 stop_words = readfile_cleaned('.\\data\\englishstopwords.txt')
@@ -212,6 +226,7 @@ for x in range(len(text)):
 
 result = np.asarray(text)
 
+# TODO a mondat végét jelző karaktereket külön elembe rakni a listában
 text_lem = np.asarray([' '], dtype=np.str)
 
 for item in result:
@@ -223,25 +238,23 @@ for item in result:
     arr = y.tolist()
     text_lem = np.append(text_lem, arr)
 
+voc = Vocabulary('test')
+
+sent_tkns = []
+sent_idxs = []
+sentence = []
+
+for word in text_lem:
+    sentence.append(word)
+    if is_sentence_end(word):
+        index = sentence.index(word)
+        sentence[index] = word.translate(trans_punctuation)
+        sentence_str = ' '.join(sentence)
+        voc.add_chunk(sentence_str)
+        sentence.clear()
+
 for item in text_lem:
     print(item)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
