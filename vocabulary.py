@@ -16,6 +16,12 @@ class Vocabulary:
         self.num_sentences = 0
         self.longest_sentence = 0
 
+    def count_words(self):
+        return self.num_words
+
+    def count_longest_sentence(self):
+        return self.longest_sentence
+
     def add_token(self, word):
         if word not in self.word2index:
             self.word2index[word] = self.num_words
@@ -55,6 +61,7 @@ class Vocabulary:
         tmp = np.load('.\\data\\' + filename + "_index2word.npy", allow_pickle=True)
         for (k, v) in tmp:
             self.index2word[int(k)] = v
+        self.num_words = len(tmp)
 
 
 
