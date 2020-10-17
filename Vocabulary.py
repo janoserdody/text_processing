@@ -40,5 +40,30 @@ class Vocabulary:
     def to_index(self, word):
         return self.word2index[word]
 
+    def save_data(self, filename):
+        tmp = [(k, v) for k, v in self.word2index.items()]
+        np.save('.\\data\\' + filename + '_word2index', tmp)
+        tmp = [(k, v) for k, v in self.index2word.items()]
+        np.save('.\\data\\' + filename + '_index2word', tmp)
+
+    def load_data(self, filename):
+        self.word2index.clear()
+        self.index2word.clear()
+        tmp = np.load('.\\data\\' + filename + "_word2index.npy", allow_pickle=True)
+        for (k, v) in tmp:
+            self.word2index[k] = int(v)
+        tmp = np.load('.\\data\\' + filename + "_index2word.npy", allow_pickle=True)
+        for (k, v) in tmp:
+            self.index2word[int(k)] = v
+
+
+
+
+
+
+
+
+
+
 
 

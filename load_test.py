@@ -29,7 +29,6 @@ translation = {
     ord(']'): None,
     ord(')'): None,
     ord('*'): None,
-    ord(','): None
 }
 
 word_to_number = {
@@ -150,31 +149,6 @@ def isnumber(name):
         return bool(1)
     return bool(0)
 
-def convert2number(xx, result):
-    if isnumber(text[xx]) or text[xx].find('-') > 0:
-        str = text[xx].split('-')
-        if len(str) == 1:
-            result = getnumber(text[xx])
-            xx += 1
-            result2 = convert2number(xx, result)
-            while type(result2) is int and xx < len(text):
-                result += result2
-                text.pop(xx)
-                result2 = convert2number(xx, result)
-        else:
-            for item in str:
-                if isnumber(item):
-                    result += getnumber(item)
-            xx += 1
-            result2 = convert2number(xx, result)
-            while type(result2) is int and xx < len(text):
-                result *= result2
-                text.pop(xx)
-                result2 = convert2number(xx, result)
-        return result
-    else:
-        return text[xx]
-
 def is_stopword(s):
     if s in stop_words:
         return bool(1)
@@ -211,59 +185,21 @@ def getTokens(sentence, N):
         print('\n')
         i = i + 1
 
-rows = readfile('.\\data\\Alice.txt')
 stem_words = readtodictionary('.\\data\\lemmatization-en.txt')
 stop_words = readfile_cleaned('.\\data\\englishstopwords.txt')
-
-result = np.asarray([' '], dtype=np.str)
-
-rows = dropheader(rows)
-
-for row in rows:
-    # find footer
-    if row.find('THE END') != -1:
-        break
-    row = row.lower().translate(translation)
-    s = np.asarray(row, dtype=np.str)
-    result = np.char.add(result, s)
-
-text = np.char.split(result).tolist()[0]
-
-text = list(filter(lambda stop: (is_stopword(stop) == bool(0)), text))
-
-for x in range(len(text)):
-    if x >= len(text):
-        break
-    text[x] = convert2number(x, 0)
-
-result = np.asarray(text)
-
-# TODO a mondat végét jelző karaktereket külön elembe rakni a listában
-text_lem = np.asarray([' '], dtype=np.str)
-
-for item in result:
-    try:
-        y = stem_words[item]
-    except:
-        y = item
-    y = np.char.split(expandContractions(y))
-    arr = y.tolist()
-    text_lem = np.append(text_lem, arr)
 
 voc = Vocabulary('test')
 
 sentence = []
 
-for word in text_lem:
-    sentence.append(word)
-    if is_sentence_end(word):
-        index = sentence.index(word)
-        sentence[index] = word.translate(trans_punctuation)
-        sentence_str = ' '.join(sentence)
-        voc.add_chunk(sentence_str)
-        sentence.clear()
+voc.load_data('test')
 
-voc.save_data('test')
+for i in range(0, 100):
+    print(voc.to_token(i))
+
+
+
+
 
 
 
