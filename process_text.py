@@ -209,6 +209,11 @@ class Processtext:
             return bool(1)
         return bool(0)
 
+    def is_sentence_conditional_end(self, word, word_cleaned):
+        if word_cleaned == "and" or word.find(',') > -1 or word.find('-') > -1:
+            return bool(1)
+        return bool(0)
+
     def get_tokens(self, sentence, n):
         slen = len(sentence)
         i = 0
@@ -266,20 +271,22 @@ class Processtext:
         for word in text_lem:
             if word == " ":
                 continue
-            sentence.append(word)
+            word_cleaned = word.translate(self.trans_punctuation)
+            sentence.append(word_cleaned)
             sen_length += 1
             if self.is_sentence_end(word) \
-                    or ((word == "and" or word.find(',') > -1 or word.find('-') > -1) and sen_length > sentence_max_len):
-                index = sentence.index(word)
-                sentence[index] = word.translate(self.trans_punctuation)
-                sentence_str = ' '.join(sentence)
+                    or (self.is_sentence_conditional_end(word, word_cleaned) and sen_length > sentence_max_len):
+                if word_cleaned != "and":
+                    text_out.append(word_cleaned)
+
+                sentence_str = ' '.join(sentence).replace(" and ","")
                 voc.add_chunk(sentence_str)
                 text_out.append(voc.to_token(self.EOS_token))
                 text_out.append(voc.to_token(self.SOS_token))
                 sentence.clear()
                 sen_length = 0
-            else:
-                text_out.append(word)
+            elif word_cleaned != "and":
+                text_out.append(word_cleaned)
 
         text_out[len(text_out) - 1] = "\n"
 
