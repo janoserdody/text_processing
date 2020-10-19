@@ -1,6 +1,4 @@
-import re
 import numpy as np
-from contractions import Contractions
 
 class Vocabulary:
     PAD_token = 0  # Used for padding short sentences
