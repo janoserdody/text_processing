@@ -10,10 +10,11 @@ class Processtext:
         self.SOS_token = 1   # Start-of-sentence token
         self.EOS_token = 2   # End-of-sentence token
         self.text = []
+        self.header_string = ''
         self.stop_words = self.readfile_cleaned('.\\data\\englishstopwords.txt')
         self.stem_words = self.readtodictionary('.\\data\\lemmatization-en.txt')
         self.trans_punctuation = {ord('.'): None, ord('?'): None, ord('!'): None, ord(';'): None, ord(','): None,
-                                  ord('-'): None}
+                                  ord('-'): None, ord(':'): None}
 
         self.translation = {
             8217: None,
@@ -23,7 +24,6 @@ class Processtext:
             8216: None,
             249: ' ',
             10: ' ',
-            ord(':'): None,
             ord('('): None,
             ord('+'): None,
             ord('/'): None,
@@ -105,7 +105,6 @@ class Processtext:
             'millionth': '1000000',
             'billionth': '1000000000'
         }
-
         self.cont = Contractions()
         self.cDict = self.cont.cDict
         self.c_re = re.compile('(%s)' % '|'.join(self.cDict.keys()))
@@ -187,7 +186,7 @@ class Processtext:
     def dropheader(self, rows):
         for x in range(len(rows)):
             row = rows[0]
-            if row.find('Alice was beginning to get very tired') != -1:
+            if row.find(self.header_string) != -1:
                 return rows
             else:
                 rows.remove(row)
@@ -210,20 +209,23 @@ class Processtext:
         return bool(0)
 
     def is_sentence_conditional_end(self, word, word_cleaned):
-        if word_cleaned == "and" or word.find(',') > -1 or word.find('-') > -1:
+        if word_cleaned == "and" or word.find(',') > -1 or word.find('-') > -1 or word.find(':') > -1:
             return bool(1)
         return bool(0)
 
-    def get_tokens(self, sentence, n):
+    def get_ngrams(self, sentence, n):
         slen = len(sentence)
         i = 0
+        ngrams = []
         while (i < slen - n + 1):
-            for token in sentence [i:i + n]:
-                print(token)
-            print('\n')
+            for token in sentence[i:i + n]:
+                ngrams.append(token)
             i = i + 1
+        return ngrams
 
-    def process(self, filename_read, filename_save, sentence_max_len = 15):
+    def process(self, filename_read, filename_save, header_string, footer_string, sentence_max_len = 15):
+        self.header_string = header_string
+
         rows = self.readfile(filename_read)
 
         result = np.asarray([' '], dtype=np.str)
@@ -232,7 +234,7 @@ class Processtext:
 
         for row in rows:
             # find footer
-            if row.find('THE END') != -1:
+            if row.find(footer_string) != -1:
                 break
             row = row.lower().translate(self.translation)
             s = np.asarray(row, dtype=np.str)
@@ -260,7 +262,7 @@ class Processtext:
             arr = y.tolist()
             text_lem = np.append(text_lem, arr)
 
-        voc = Vocabulary('test')
+        voc = Vocabulary('vocabulary')
 
         sentence = []
 
@@ -290,7 +292,7 @@ class Processtext:
 
         text_out[len(text_out) - 1] = "\n"
 
-        voc.save_data('test')
+        voc.save_data(filename_save)
 
         x = 0
         file_proc = open(filename_save, "w")
@@ -303,7 +305,3 @@ class Processtext:
             x += 1
 
         file_proc.close()
-
-
-
-

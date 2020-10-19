@@ -1,6 +1,5 @@
 from typing import Dict, Any, Union
 
-
 class Contractions:
     cDict = {
   "ain't": "am not",
